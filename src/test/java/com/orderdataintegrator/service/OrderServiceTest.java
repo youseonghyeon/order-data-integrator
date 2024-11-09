@@ -2,7 +2,6 @@ package com.orderdataintegrator.service;
 
 import com.orderdataintegrator.entity.Order;
 import com.orderdataintegrator.entity.OrderStatus;
-import com.orderdataintegrator.exception.ApiException;
 import com.orderdataintegrator.repository.OrderRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
