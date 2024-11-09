@@ -18,4 +18,6 @@ public interface OrderRepository {
     List<Order> findAll();
 
     void truncate();
+
+    boolean existsById(Long orderId);
 }

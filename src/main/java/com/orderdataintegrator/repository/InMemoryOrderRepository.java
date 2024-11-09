@@ -53,4 +53,9 @@ public class InMemoryOrderRepository implements OrderRepository {
         orderStore.clear();
     }
 
+    @Override
+    public boolean existsById(Long orderId) {
+        return orderStore.containsKey(orderId);
+    }
+
 }

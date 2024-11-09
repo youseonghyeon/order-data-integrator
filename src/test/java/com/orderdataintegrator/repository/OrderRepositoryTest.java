@@ -120,6 +120,21 @@ class OrderRepositoryTest {
         assertEquals(1000, allOrders.size(), "주문 다건 조회 실패");
     }
 
+    @Test
+    @DisplayName("주문 존재 여부 확인 성공")
+    void existsById() {
+        Order mockOrder = createMockOrder(1L);
+        orderRepository.save(mockOrder);
+
+        assertTrue(orderRepository.existsById(1L), "주문 존재 여부 확인 실패");
+    }
+
+    @Test
+    @DisplayName("주문 존재 여부 확인 실패 - 존재하지 않는 주문 ID")
+    void existsByIdNotFound() {
+        assertFalse(orderRepository.existsById(90L), "존재하지 않는 주문 존재 여부 확인 실패");
+    }
+
     private Order createMockOrder(Long orderId) {
         LocalDateTime orderDate = LocalDateTime.of(2024, 11, 9, 13, 30);
         return new Order(orderId, "홍길동", orderDate, OrderStatus.PROCESSING);
