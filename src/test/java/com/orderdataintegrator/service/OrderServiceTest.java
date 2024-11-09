@@ -10,9 +10,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest
 class OrderServiceTest {
@@ -22,6 +27,14 @@ class OrderServiceTest {
     @Autowired
     private OrderRepository orderRepository;
 
+    @TestConfiguration
+    static class OrderServiceTestConfig {
+        @Bean
+        public OrderService orderService(OrderRepository orderRepository) {
+            return new OrderService(new TestOrderDataFetcher(), orderRepository);
+        }
+    }
+
     @BeforeEach
     void tearDown() {
         orderRepository.truncate();
@@ -30,20 +43,18 @@ class OrderServiceTest {
     @Test
     @DisplayName("주문 단건 조회 성공")
     void findOrderById() {
-        //given
-        LocalDateTime orderDate = LocalDateTime.of(2024, 11, 9, 13, 30);
-        Order order = new Order(3528L, "홍길동", orderDate, OrderStatus.PROCESSING);
+        // Given
+        Order order = createMockOrder(3528L);
         orderRepository.save(order);
-        //when
-        Order findOrder = orderService.findOrderById(3528L);
-        //then
-        Assertions.assertEquals(order, findOrder);
+        // When
+        Order foundOrder = orderService.findOrderById(3528L);
+        // Then
+        assertEquals(order, foundOrder);
     }
 
     @Test
     @DisplayName("주문 단건 조회 실패 - 주문 ID가 존재하지 않음")
     void findOrderByIdFail() {
-        //then
         Assertions.assertThrows(ApiException.class, () -> orderService.findOrderById(1L));
     }
 
@@ -55,24 +66,22 @@ class OrderServiceTest {
         //when
         List<Order> allOrders = orderService.findAllOrders();
         //then
-        Assertions.assertEquals(1000, allOrders.size());
+        assertEquals(1000, allOrders.size());
     }
 
     @Test
     @DisplayName("주문 리스트 조회 실패 - 주문 데이터가 존재하지 않음")
     void findAllOrdersFail() {
-        //then
         Assertions.assertTrue(orderService.findAllOrders().isEmpty());
     }
 
     @Test
+    @DisplayName("주문 데이터 조회 및 저장 (테스트 Config TestOrderDataFetcher 사용)")
     void fetchAndSaveOrders() {
-        //given
-        //when
+        // When
         orderService.fetchAndSaveOrders();
-        //then
-        List<Order> allOrders = orderService.findAllOrders();
-        Assertions.assertFalse(allOrders.isEmpty());
+        // Then
+        assertFalse(orderService.findAllOrders().isEmpty());
     }
 
     private Order createMockOrder(Long orderId) {
@@ -85,4 +94,5 @@ class OrderServiceTest {
             orderRepository.save(createMockOrder(id));
         }
     }
+
 }
