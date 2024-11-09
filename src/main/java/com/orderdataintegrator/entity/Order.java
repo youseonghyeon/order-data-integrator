@@ -1,4 +1,5 @@
 package com.orderdataintegrator.entity;
 
-public record Order() {
-}
+import java.time.LocalDateTime;
+
+public record Order(Long orderId, String customerName, LocalDateTime orderDate, OrderStatus orderStatus) {}
