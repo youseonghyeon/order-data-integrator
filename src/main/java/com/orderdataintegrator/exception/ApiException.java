@@ -8,30 +8,30 @@ import java.util.Objects;
 @Getter
 public class ApiException extends RuntimeException {
 
+    private final String responseMessage;
     private final HttpStatus httpStatus;
-    private final String errorMessage;
 
-    public ApiException(HttpStatus httpStatus, String errorMessage) {
+    public ApiException(String responseMessage, HttpStatus httpStatus) {
         super();
         this.httpStatus = Objects.requireNonNull(httpStatus, "httpStatus cannot be null");
-        this.errorMessage = errorMessage != null ? errorMessage : "";
+        this.responseMessage = responseMessage != null ? responseMessage : "";
     }
 
-    public ApiException(String message, HttpStatus httpStatus, String errorMessage) {
-        super(message);
+    public ApiException(String responseMessage, HttpStatus httpStatus, String exceptionMessage) {
+        super(exceptionMessage);
         this.httpStatus = Objects.requireNonNull(httpStatus, "httpStatus cannot be null");
-        this.errorMessage = errorMessage != null ? errorMessage : "";
+        this.responseMessage = responseMessage != null ? responseMessage : "";
     }
 
-    public ApiException(String message, Throwable cause, HttpStatus httpStatus, String errorMessage) {
-        super(message, cause);
+    public ApiException(String responseMessage, HttpStatus httpStatus, String exceptionMessage, Throwable cause) {
+        super(exceptionMessage, cause);
         this.httpStatus = Objects.requireNonNull(httpStatus, "httpStatus cannot be null");
-        this.errorMessage = errorMessage != null ? errorMessage : "";
+        this.responseMessage = responseMessage != null ? responseMessage : "";
     }
 
-    public ApiException(Throwable cause, HttpStatus httpStatus, String errorMessage) {
+    public ApiException(String responseMessage, HttpStatus httpStatus, Throwable cause) {
         super(cause);
         this.httpStatus = Objects.requireNonNull(httpStatus, "httpStatus cannot be null");
-        this.errorMessage = errorMessage != null ? errorMessage : "";
+        this.responseMessage = responseMessage != null ? responseMessage : "";
     }
 }

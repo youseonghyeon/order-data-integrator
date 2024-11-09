@@ -21,7 +21,7 @@ public class ApiControllerAdvice {
         }
 
         HttpStatus httpStatus = e.getHttpStatus() != null ? e.getHttpStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-        ApiResponse<String> stringApiResponse = new ApiResponse<>(e.getErrorMessage(), null); // TODO 데이터 정리 필요
+        ApiResponse<String> stringApiResponse = new ApiResponse<>(e.getResponseMessage(), null); // TODO 데이터 정리 필요
         return ResponseEntity.status(httpStatus).body(stringApiResponse);
     }
 

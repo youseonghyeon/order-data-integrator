@@ -1,49 +1,56 @@
 package com.orderdataintegrator.repository;
 
 import com.orderdataintegrator.entity.Order;
+import com.orderdataintegrator.exception.ApiException;
+import org.springframework.http.HttpStatus;
+import org.yaml.snakeyaml.constructor.DuplicateKeyException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class InMemoryOrderRepository implements OrderRepository {
 
-    private final Map<String, Order> orderStore = new HashMap<>();
+    private final Map<Long, Order> orderStore = new HashMap<>();
 
     @Override
     public void save(Order order) {
-        // TODO Functionality needs to be implemented
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (orderStore.containsKey(order.orderId())) {
+            throw new IllegalStateException("order id duplicated error");
+        }
+        orderStore.put(order.orderId(), order);
     }
 
     @Override
     public void saveAll(List<Order> orders) {
-        // TODO Functionality needs to be implemented
-        throw new UnsupportedOperationException("Not supported yet.");
+        boolean existingOrder = orders.stream().anyMatch(order -> orderStore.containsKey(order.orderId()));
+        if (existingOrder) {
+            throw new IllegalStateException("order id duplicated error");
+        }
+        for (Order order : orders) {
+            orderStore.put(order.orderId(), order);
+        }
     }
 
     @Override
     public void update(Order order) {
-        // TODO Functionality needs to be implemented
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (!orderStore.containsKey(order.orderId())) {
+            throw new NoSuchElementException("order id not found error");
+        }
+        orderStore.put(order.orderId(), order);
     }
 
     @Override
-    public Optional<Order> findById(Long id) {
-        // TODO Functionality needs to be implemented
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Optional<Order> findById(Long orderId) {
+        return Optional.ofNullable(orderStore.get(orderId));
     }
 
     @Override
     public List<Order> findAll() {
-        // TODO Functionality needs to be implemented
-        throw new UnsupportedOperationException("Not supported yet.");
+        return List.copyOf(orderStore.values());
     }
 
     @Override
     public void truncate() {
-        // TODO Functionality needs to be implemented
-        throw new UnsupportedOperationException("Not supported yet.");
+        orderStore.clear();
     }
+
 }

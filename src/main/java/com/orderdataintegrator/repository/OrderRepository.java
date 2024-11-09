@@ -13,7 +13,7 @@ public interface OrderRepository {
 
     void update(Order order);
 
-    Optional<Order> findById(Long id);
+    Optional<Order> findById(Long orderId);
 
     List<Order> findAll();
 

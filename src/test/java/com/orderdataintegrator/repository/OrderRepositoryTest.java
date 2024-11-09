@@ -2,7 +2,6 @@ package com.orderdataintegrator.repository;
 
 import com.orderdataintegrator.entity.Order;
 import com.orderdataintegrator.entity.OrderStatus;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,7 +55,7 @@ class OrderRepositoryTest {
         Order mockOrder = createMockOrder(1L);
         orderRepository.save(mockOrder);
 
-        assertThrows(Exception.class, () -> orderRepository.save(mockOrder), "중복 주문 ID로 인한 저장 실패 검증 실패");
+        assertThrows(IllegalStateException.class, () -> orderRepository.save(mockOrder), "중복 주문 ID로 인한 저장 실패 검증 실패");
     }
 
     @Test
@@ -66,7 +66,31 @@ class OrderRepositoryTest {
         Order duplicateOrder = createMockOrder(1L);
 
         orderRepository.saveAll(List.of(firstOrder, secondOrder));
-        assertThrows(Exception.class, () -> orderRepository.saveAll(List.of(duplicateOrder)), "중복 주문 ID로 인한 저장 실패 검증 실패");
+        assertThrows(IllegalStateException.class, () -> orderRepository.saveAll(List.of(duplicateOrder)), "중복 주문 ID로 인한 저장 실패 검증 실패");
+    }
+
+    @Test
+    @DisplayName("주문 단건 수정 성공")
+    void updateOrder() {
+        Order mockOrder = createMockOrder(1L);
+        orderRepository.save(mockOrder);
+
+        Order updatedOrder = new Order(1L, "홍길동", LocalDateTime.of(2024, 11, 9, 13, 30), OrderStatus.PROCESSING);
+        orderRepository.update(updatedOrder);
+
+        Optional<Order> foundOrder = orderRepository.findById(1L);
+        assertTrue(foundOrder.isPresent(), "주문 단건 수정 실패");
+        assertEquals(updatedOrder, foundOrder.get(), "수정된 주문 정보가 일치하지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("주문 단건 수정 실패 - 존재하지 않는 주문 ID")
+    void updateOrderNotFound() {
+        Order mockOrder = createMockOrder(1L);
+        orderRepository.save(mockOrder);
+
+        Order updatedOrder = new Order(90L, "홍길동", LocalDateTime.of(2024, 11, 9, 13, 30), OrderStatus.PROCESSING);
+        assertThrows(NoSuchElementException.class, () -> orderRepository.update(updatedOrder), "존재하지 않는 주문 수정 검증 실패");
     }
 
     @Test
