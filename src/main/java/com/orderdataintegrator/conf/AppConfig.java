@@ -1,13 +1,23 @@
 package com.orderdataintegrator.conf;
 
 import com.orderdataintegrator.external.HttpOrderDataFetcher;
+import com.orderdataintegrator.external.HttpOrderDataSender;
+import com.orderdataintegrator.external.OrderDataSender;
 import com.orderdataintegrator.repository.InMemoryOrderRepository;
 import com.orderdataintegrator.repository.OrderRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class AppConfig {
+
+    @Value("${order.fetch.url:https://test/order/fetch}")
+    private String orderFetchUrl;
+
+    @Value("${order.send.url:https://test/order/send}")
+    private String orderSendUrl;
 
     @Bean
     public OrderRepository orderRepository() {
@@ -15,7 +25,17 @@ public class AppConfig {
     }
 
     @Bean
-    public HttpOrderDataFetcher httpOrderDataFetcher() {
-        return new HttpOrderDataFetcher();
+    public HttpOrderDataFetcher httpOrderDataFetcher(RestTemplate restTemplate) {
+        return new HttpOrderDataFetcher(restTemplate, orderFetchUrl);
+    }
+
+    @Bean
+    public OrderDataSender orderDataSender(RestTemplate restTemplate) {
+        return new HttpOrderDataSender(restTemplate, orderSendUrl);
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }
