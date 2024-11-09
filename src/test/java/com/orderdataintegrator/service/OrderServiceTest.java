@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -55,7 +56,7 @@ class OrderServiceTest {
     @Test
     @DisplayName("주문 단건 조회 실패 - 주문 ID가 존재하지 않음")
     void findOrderByIdFail() {
-        Assertions.assertThrows(ApiException.class, () -> orderService.findOrderById(1L));
+        Assertions.assertThrows(NoSuchElementException.class, () -> orderService.findOrderById(1L));
     }
 
     @Test

@@ -1,15 +1,14 @@
 package com.orderdataintegrator.service;
 
 import com.orderdataintegrator.entity.Order;
-import com.orderdataintegrator.exception.ApiException;
 import com.orderdataintegrator.external.OrderDataFetcher;
 import com.orderdataintegrator.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
@@ -21,7 +20,7 @@ public class OrderService {
 
     public Order findOrderById(Long orderId) {
         return orderRepository.findById(orderId)
-                .orElseThrow(() -> new ApiException("order id not found error", HttpStatus.BAD_REQUEST));
+                .orElseThrow(() -> new NoSuchElementException("order id not found error"));
     }
 
     public List<Order> findAllOrders() {
