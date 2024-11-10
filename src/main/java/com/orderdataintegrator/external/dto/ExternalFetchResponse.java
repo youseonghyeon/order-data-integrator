@@ -1,18 +1,32 @@
 package com.orderdataintegrator.external.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.orderdataintegrator.entity.Order;
 import com.orderdataintegrator.entity.OrderStatus;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ExternalFetchResponse {
 
+    @JsonProperty("orderId")
     private Long orderId;
+
+    @JsonProperty("customerName")
     private String customerName;
+
+    @JsonProperty("orderDate")
     private LocalDateTime orderDate;
-    private OrderStatus orderStatus;
+
+    @JsonProperty("orderStatus")
+    private String orderStatus;
+
+    @JsonProperty("etc")
     private String etc;
 
     public static Order toOrder(ExternalFetchResponse externalFetchResponse) {
@@ -27,7 +41,7 @@ public class ExternalFetchResponse {
                 externalFetchResponse.orderId,
                 externalFetchResponse.customerName,
                 externalFetchResponse.orderDate,
-                externalFetchResponse.orderStatus
+                OrderStatus.valueOf(externalFetchResponse.orderStatus)
         );
     }
 

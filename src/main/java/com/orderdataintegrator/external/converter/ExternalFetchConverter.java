@@ -1,6 +1,7 @@
 package com.orderdataintegrator.external.converter;
 
 import com.orderdataintegrator.entity.Order;
+import com.orderdataintegrator.entity.OrderStatus;
 import com.orderdataintegrator.external.dto.ExternalFetchResponse;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,7 +20,7 @@ public class ExternalFetchConverter {
                 externalFetchResponse.getOrderId(),
                 externalFetchResponse.getCustomerName(),
                 externalFetchResponse.getOrderDate(),
-                externalFetchResponse.getOrderStatus()
+                OrderStatus.valueOf(externalFetchResponse.getOrderStatus())
         );
     }
 }
