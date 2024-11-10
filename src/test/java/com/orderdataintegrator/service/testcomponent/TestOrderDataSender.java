@@ -8,6 +8,6 @@ import java.util.List;
 public class TestOrderDataSender implements OrderDataSender {
     @Override
     public boolean sendOrderData(List<Order> orderList) {
-        return false;
+        return !orderList.isEmpty();
     }
 }
