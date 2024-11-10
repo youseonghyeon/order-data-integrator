@@ -1,12 +1,13 @@
 package com.orderdataintegrator.external;
 
-import com.orderdataintegrator.entity.Order;
+import com.orderdataintegrator.external.dto.ExternalFetchRequestQuery;
+import com.orderdataintegrator.external.dto.ExternalFetchResponse;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.function.Function;
 
-public interface OrderDataFetcher<I> {
+public interface OrderDataFetcher {
 
-    List<Order> fetchOrderData(Optional<I> param);
+    <T> List<T> fetchOrderData(ExternalFetchRequestQuery param, Function<ExternalFetchResponse, T> converter);
 
 }

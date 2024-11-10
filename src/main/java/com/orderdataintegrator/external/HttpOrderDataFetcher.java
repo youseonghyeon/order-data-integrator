@@ -1,67 +1,65 @@
 package com.orderdataintegrator.external;
 
-import com.orderdataintegrator.entity.Order;
-import com.orderdataintegrator.entity.OrderStatus;
-import lombok.Getter;
+import com.orderdataintegrator.external.dto.ExternalFetchRequestQuery;
+import com.orderdataintegrator.external.dto.ExternalFetchResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
+import java.util.function.Function;
 
 @Slf4j
 @RequiredArgsConstructor
-public class HttpOrderDataFetcher implements OrderDataFetcher<Void> {
+public class HttpOrderDataFetcher implements OrderDataFetcher {
 
     private final RestTemplate restTemplate;
     private final String externalServiceUrl;
 
     @Override
-    public List<Order> fetchOrderData(Optional<Void> input) {
-        try {
-            ExternalResponse[] response = restTemplate.getForObject(externalServiceUrl, ExternalResponse[].class);
+    public <T> List<T> fetchOrderData(ExternalFetchRequestQuery input, Function<ExternalFetchResponse, T> converter) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", "application/json");
 
-            if (response == null) {
-                log.warn("Received null response from external service");
+        HttpEntity<ExternalFetchRequestQuery> requestEntity = new HttpEntity<>(input, headers);
+
+        try {
+            ResponseEntity<ExternalFetchResponse[]> response = restTemplate.exchange(
+                    externalServiceUrl,
+                    HttpMethod.GET,
+                    requestEntity,
+                    ExternalFetchResponse[].class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                log.info("Successfully fetched order data from external service.");
+                ExternalFetchResponse[] body = response.getBody();
+
+                log.info("Fetched order data : {}", Arrays.toString(body));
+
+                return Arrays.stream(body)
+                        .map(converter)
+                        .filter(Objects::nonNull)
+                        .toList();
+            } else {
+                log.warn("Received non-successful HTTP status code: {}", response.getStatusCode());
                 return Collections.emptyList();
             }
 
-            return Arrays.stream(response)
-                    .map(ExternalResponse::toOrder)
-                    .toList();
-
         } catch (RestClientException e) {
-            log.error("Failed to fetch order data from external service: {}", e.getMessage(), e);
+            log.error("Network error while fetching order data: {}", e.getMessage(), e);
             return Collections.emptyList();
         } catch (Exception e) {
-            log.error("An error occurred while processing order data: {}", e.getMessage(), e);
-            throw new RuntimeException("An error occurred while fetching order data", e);
-        }
-    }
-
-    @Getter
-    static class ExternalResponse {
-        private Long orderId;
-        private String customerName;
-        private LocalDateTime orderDate;
-        private OrderStatus orderStatus;
-        private String etc;
-
-        protected static Order toOrder(ExternalResponse externalResponse) {
-            if (externalResponse.orderId == null || externalResponse.customerName == null || externalResponse.orderDate == null) {
-                throw new IllegalArgumentException("Invalid order data received: Missing required fields");
-            }
-            return new Order(
-                    externalResponse.orderId,
-                    externalResponse.customerName,
-                    externalResponse.orderDate,
-                    externalResponse.orderStatus
-            );
+            log.error("An unexpected error occurred while processing order data: {}", e.getMessage(), e);
+            throw new RuntimeException("An unexpected error occurred while fetching order data", e);
         }
     }
 }

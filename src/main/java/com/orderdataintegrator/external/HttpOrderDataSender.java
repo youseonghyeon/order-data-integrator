@@ -1,7 +1,9 @@
 package com.orderdataintegrator.external;
 
 import com.orderdataintegrator.entity.Order;
-import lombok.Getter;
+import com.orderdataintegrator.external.converter.ExternalSendRequestConverter;
+import com.orderdataintegrator.external.dto.ExternalSenderRequest;
+import com.orderdataintegrator.external.dto.ExternalSenderResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
@@ -24,7 +26,10 @@ public class HttpOrderDataSender implements OrderDataSender {
     public boolean sendOrderData(List<Order> orderList) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
-        HttpEntity<List<Order>> requestEntity = new HttpEntity<>(orderList, headers);
+
+        ExternalSenderRequest externalSenderRequest = ExternalSendRequestConverter.convertToExternalSendRequest(orderList);
+
+        HttpEntity<ExternalSenderRequest> requestEntity = new HttpEntity<>(externalSenderRequest, headers);
 
         try {
             ResponseEntity<ExternalSenderResponse> response = restTemplate.exchange(
@@ -32,7 +37,7 @@ public class HttpOrderDataSender implements OrderDataSender {
             );
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                log.info("Order data sent successfully: {}", response.getBody().getMessage());
+                log.info("Successfully send order data to external service. {}", response.getBody().getMessage());
                 return true;
             } else {
                 log.error("Failed to send order data. Status code: {}", response.getStatusCode());
@@ -49,9 +54,5 @@ public class HttpOrderDataSender implements OrderDataSender {
         }
     }
 
-    @Getter
-    static class ExternalSenderResponse {
-        private String message;
-        private String etc;
-    }
+
 }

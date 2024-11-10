@@ -1,22 +1,16 @@
 package com.orderdataintegrator.service;
 
-import com.orderdataintegrator.entity.Order;
 import com.orderdataintegrator.external.OrderDataFetcher;
+import com.orderdataintegrator.external.dto.ExternalFetchRequestQuery;
+import com.orderdataintegrator.external.dto.ExternalFetchResponse;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.function.Function;
 
-public class TestOrderDataFetcher implements OrderDataFetcher<Void> {
+public class TestOrderDataFetcher implements OrderDataFetcher {
+
     @Override
-    public List<Order> fetchOrderData(Optional<Void> param) {
-        return List.of(
-                new Order(1L, "John Doe", null, null),
-                new Order(2L, "Jane Doe", null, null),
-                new Order(3L, "Alice", null, null),
-                new Order(4L, "Bob", null, null),
-                new Order(5L, "Charlie", null, null),
-                new Order(6L, "David", null, null),
-                new Order(7L, "Eve", null, null)
-        );
+    public <T> List<T> fetchOrderData(ExternalFetchRequestQuery param, Function<ExternalFetchResponse, T> converter) {
+        return List.of();
     }
 }

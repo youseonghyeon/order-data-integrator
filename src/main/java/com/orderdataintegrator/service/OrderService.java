@@ -2,6 +2,8 @@ package com.orderdataintegrator.service;
 
 import com.orderdataintegrator.entity.Order;
 import com.orderdataintegrator.external.OrderDataFetcher;
+import com.orderdataintegrator.external.OrderDataSender;
+import com.orderdataintegrator.external.converter.ExternalFetchConverter;
 import com.orderdataintegrator.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,8 +17,9 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class OrderService {
 
-    private final OrderDataFetcher<Void> orderDataFetcher;
+    private final OrderDataFetcher orderDataFetcher;
     private final OrderRepository orderRepository;
+    private final OrderDataSender orderDataSender;
 
     public Order findOrderById(Long orderId) {
         return orderRepository.findById(orderId)
@@ -28,15 +31,11 @@ public class OrderService {
     }
 
     public void fetchAndSaveOrders() {
-        List<Order> orders = orderDataFetcher.fetchOrderData(null);
+        List<Order> orders = orderDataFetcher.fetchOrderData(null, ExternalFetchConverter::toOrder);
         if (orders.isEmpty()) {
             log.warn("No order data fetched.");
             return;
         }
-        saveOrUpdateOrders(orders);
-    }
-
-    private void saveOrUpdateOrders(List<Order> orders) {
         orders.forEach(this::saveOrUpdateOrder);
     }
 
@@ -49,4 +48,19 @@ public class OrderService {
             orderRepository.update(order);
         }
     }
+
+    public void sendOrdersToExternalService() {
+        List<Order> orders = orderRepository.findAll();
+        if (orders.isEmpty()) {
+            log.warn("No order data to send.");
+            return;
+        }
+        boolean success = orderDataSender.sendOrderData(orders);
+        if (success) {
+            log.info("All order data sent successfully");
+        } else {
+            log.error("Failed to send order data");
+        }
+    }
+
 }
