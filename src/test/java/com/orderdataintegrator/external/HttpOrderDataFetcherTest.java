@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.orderdataintegrator.entity.Order;
 import com.orderdataintegrator.entity.OrderStatus;
+import com.orderdataintegrator.external.converter.ExternalFetchConverter;
 import com.orderdataintegrator.external.dto.ExternalFetchRequestQuery;
 import com.orderdataintegrator.external.dto.ExternalFetchResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +51,7 @@ class HttpOrderDataFetcherTest {
     void testFetchOrderDataSuccess() throws JsonProcessingException {
         // Arrange
         ExternalFetchRequestQuery query = new ExternalFetchRequestQuery("test-data");
-        Function<ExternalFetchResponse, Order> converter = ExternalFetchResponse::toOrder;
+        Function<ExternalFetchResponse, Order> converter = ExternalFetchConverter::toOrder;
 
         ExternalFetchResponse bodyObject = new ExternalFetchResponse(12L, "홍길동", LocalDateTime.now(), OrderStatus.SHIPPING.name(), "etc");
         String body = objectMapper.writeValueAsString(Collections.singletonList(bodyObject));

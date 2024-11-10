@@ -2,12 +2,16 @@ package com.orderdataintegrator.external.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 public class ExternalFetchRequestQuery {
 
-    private String query;
+    private String q;
+    private String sort, order, per_page, page; // query parameters
+
+    public ExternalFetchRequestQuery(String q) {
+        this.q = q;
+    }
 
 }

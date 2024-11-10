@@ -4,6 +4,8 @@ import com.orderdataintegrator.entity.Order;
 import com.orderdataintegrator.entity.OrderStatus;
 import com.orderdataintegrator.external.OrderDataSender;
 import com.orderdataintegrator.repository.OrderRepository;
+import com.orderdataintegrator.service.testcomponent.TestOrderDataFetcher;
+import com.orderdataintegrator.service.testcomponent.TestOrderDataSender;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,8 +34,9 @@ class OrderServiceTest {
     static class OrderServiceTestConfig {
         @Bean
         public OrderService orderService(OrderRepository orderRepository, OrderDataSender orderDataSender) {
-            return new OrderService(new TestOrderDataFetcher(), orderRepository, orderDataSender);
+            return new OrderService(new TestOrderDataFetcher(), orderRepository, new TestOrderDataSender());
         }
+
     }
 
     @BeforeEach
@@ -82,7 +85,16 @@ class OrderServiceTest {
         // When
         orderService.fetchAndSaveOrders();
         // Then
-//        assertFalse(orderService.findAllOrders().isEmpty());
+        assertFalse(orderService.findAllOrders().isEmpty());
+    }
+
+    @Test
+    @DisplayName("주문 데이터 Fetch 성공")
+    void fetchAndSaveOrdersSuccess() {
+        // When
+        orderService.fetchAndSaveOrders();
+        // Then
+        assertFalse(orderService.findAllOrders().isEmpty());
     }
 
     @Test
@@ -92,8 +104,17 @@ class OrderServiceTest {
         insertMockOrders(1, 1000);
         // When
         orderService.sendOrdersToExternalService();
-        // TODO : 외부 서비스로 주문 데이터 전송 성공 여부 확인
+        // Then
+        assertFalse(orderService.findAllOrders().isEmpty());
     }
+
+    @Test
+    @DisplayName("주문 데이터 전송 실패 - 주문 데이터가 존재하지 않음")
+    void sendOrdersToExternalServiceFail() {
+        orderService.sendOrdersToExternalService();
+        // No order data to send 로그 확인
+    }
+
 
     private Order createMockOrder(Long orderId) {
         LocalDateTime orderDate = LocalDateTime.of(2024, 11, 9, 13, 30);

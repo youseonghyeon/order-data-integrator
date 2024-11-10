@@ -2,6 +2,8 @@ package com.orderdataintegrator.repository;
 
 import com.orderdataintegrator.entity.Order;
 import com.orderdataintegrator.entity.OrderStatus;
+import com.orderdataintegrator.exception.DuplicateOrderException;
+import com.orderdataintegrator.exception.OrderNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,7 +56,7 @@ class OrderRepositoryTest {
         Order mockOrder = createMockOrder(1L);
         orderRepository.save(mockOrder);
 
-        assertThrows(IllegalStateException.class, () -> orderRepository.save(mockOrder), "중복 주문 ID로 인한 저장 실패 검증 실패");
+        assertThrows(DuplicateOrderException.class, () -> orderRepository.save(mockOrder), "중복 주문 ID로 인한 저장 실패 검증 실패");
     }
 
     @Test
@@ -66,7 +67,7 @@ class OrderRepositoryTest {
         Order duplicateOrder = createMockOrder(1L);
 
         orderRepository.saveAll(List.of(firstOrder, secondOrder));
-        assertThrows(IllegalStateException.class, () -> orderRepository.saveAll(List.of(duplicateOrder)), "중복 주문 ID로 인한 저장 실패 검증 실패");
+        assertThrows(DuplicateOrderException.class, () -> orderRepository.saveAll(List.of(duplicateOrder)), "중복 주문 ID로 인한 저장 실패 검증 실패");
     }
 
     @Test
@@ -90,7 +91,7 @@ class OrderRepositoryTest {
         orderRepository.save(mockOrder);
 
         Order updatedOrder = new Order(90L, "홍길동", LocalDateTime.of(2024, 11, 9, 13, 30), OrderStatus.PROCESSING);
-        assertThrows(NoSuchElementException.class, () -> orderRepository.update(updatedOrder), "존재하지 않는 주문 수정 검증 실패");
+        assertThrows(OrderNotFoundException.class, () -> orderRepository.update(updatedOrder), "존재하지 않는 주문 수정 검증 실패");
     }
 
     @Test

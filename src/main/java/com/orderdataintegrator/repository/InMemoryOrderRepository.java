@@ -1,36 +1,35 @@
 package com.orderdataintegrator.repository;
 
 import com.orderdataintegrator.entity.Order;
+import com.orderdataintegrator.exception.DuplicateOrderException;
+import com.orderdataintegrator.exception.OrderNotFoundException;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryOrderRepository implements OrderRepository {
 
-    private final Map<Long, Order> orderStore = new HashMap<>();
+    private final Map<Long, Order> orderStore = new ConcurrentHashMap<>();
 
     @Override
     public void save(Order order) {
         if (orderStore.containsKey(order.orderId())) {
-            throw new IllegalStateException("order id duplicated error");
+            throw new DuplicateOrderException("Order ID already exists: " + order.orderId());
         }
         orderStore.put(order.orderId(), order);
     }
 
     @Override
     public void saveAll(List<Order> orders) {
-        boolean existingOrder = orders.stream().anyMatch(order -> orderStore.containsKey(order.orderId()));
-        if (existingOrder) {
-            throw new IllegalStateException("order id duplicated error");
-        }
         for (Order order : orders) {
-            orderStore.put(order.orderId(), order);
+            save(order); // save 메서드를 호출하여 중복 검사와 추가를 일관되게 처리
         }
     }
 
     @Override
     public void update(Order order) {
         if (!orderStore.containsKey(order.orderId())) {
-            throw new NoSuchElementException("order id not found error");
+            throw new OrderNotFoundException("Order ID not found: " + order.orderId());
         }
         orderStore.put(order.orderId(), order);
     }
@@ -54,5 +53,4 @@ public class InMemoryOrderRepository implements OrderRepository {
     public boolean existsById(Long orderId) {
         return orderStore.containsKey(orderId);
     }
-
 }
